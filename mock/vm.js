@@ -1,0 +1,122 @@
+import Mock from 'mockjs'
+
+const List = []
+const count = 100
+
+const baseContent = '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>'
+const image_uri = 'https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3'
+
+for (let i = 0; i < count; i++) {
+  List.push(Mock.mock({
+    vid: '@increment',
+    name: '@cword(7)',
+    desc: 'mock data',
+    gid: '@integer(1, 100)',
+    hid: '@integer(1, 100)',
+    mem_size: '@integer(20, 100)',
+    mem_used: '@integer(1, 20)',
+    disk_size: '@integer(20, 100)',
+    disk_used: '@integer(1, 20)',
+    cpu_num: '@integer(1, 10)',
+    cpu_used: '@integer(1, 100)',
+    'os|1': ['centos7', 'ubuntu6.01', 'windows'],
+    'iso|1': ['centos7.iso', 'ubuntu6.01.iso', 'windows.iso'],
+    'storage|1': ['storage01', 'storage02', 'storage03'],
+    state: '@integer(1, 5)'
+  }))
+}
+
+export default [
+  {
+    url: '/vm/list',
+    type: 'get',
+    response: config => {
+      const { name, page = 1, limit = 20 } = config.query
+
+      const mockList = List.filter(item => {
+        if (name && item.name.indexOf(name) < 0) return false
+        return true
+      })
+      const pageList = mockList.filter((item, index) => index < limit * page && index >= limit * (page - 1))
+
+      return {
+        code: 20000,
+        data: {
+          total: mockList.length,
+          items: pageList
+        }
+      }
+    }
+  },
+
+  {
+    url: '/vm/detail',
+    type: 'get',
+    response: config => {
+      const { id } = config.query
+      for (const vm of List) {
+        if (vm.vid === +id) {
+          return {
+            code: 20000,
+            data: vm
+          }
+        }
+      }
+    }
+  },
+
+  {
+    url: '/vm/create',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
+  {
+    url: '/vm/update',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+  {
+    url: '/vm/delete',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
+  {
+    url: '/vm/runing',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
+  {
+    url: '/vm/pause',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  }
+]
+

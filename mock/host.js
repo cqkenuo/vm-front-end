@@ -23,6 +23,18 @@ for (let i = 0; i < count; i++) {
     password: '@title(5)'
   }))
 }
+function hostParamsFilter (params) {
+  return {
+    hid: params.hid || undefined,
+    hostName: params.name,
+    hostDesc: params.desc,
+    ipAddr: params.ipaddr,
+    cpuNum: params.cpu_num,
+    memSize: params.mem_size,
+    pwd: params.password,
+    memUsed: params.mem_used || undefined
+  }
+}
 
 export default [
   {
@@ -46,7 +58,6 @@ export default [
       }
     }
   },
-
   {
     url: '/host/detail',
     type: 'get',
@@ -108,6 +119,52 @@ export default [
 
   {
     url: '/host/pause',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
+  {
+    url: '/vm/allControl/getHostMsgList',
+    type: 'post',
+    response: config => {
+      return {
+        code: 20000,
+        msg: List.map(item => { return hostParamsFilter(item) })
+      }
+    }
+  },
+  {
+    url: '/vm/allControl/getHostMsg',
+    type: 'post',
+    response: config => {
+      const { id } = config.body.hid
+      for (const host of List) {
+        if (host.hid === +id) {
+          return {
+            code: 20000,
+            data: host
+          }
+        }
+      }
+    }
+  },
+  {
+    url: '/vm/allControl/addHost',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+  {
+    url: '/vm/allControl/deleteHost',
     type: 'post',
     response: _ => {
       return {

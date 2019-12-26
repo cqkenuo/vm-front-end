@@ -1,6 +1,8 @@
 import Mock from 'mockjs'
 
 const List = []
+const IsoList = ['centos7.iso', 'ubuntu6.01.iso', 'windows.iso']
+const StorageList = ['storage01', 'storage02', 'storage03']
 const count = 100
 
 const baseContent = '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>'
@@ -19,9 +21,9 @@ for (let i = 0; i < count; i++) {
     disk_used: '@integer(1, 20)',
     cpu_num: '@integer(1, 10)',
     cpu_used: '@integer(1, 100)',
-    'os|1': ['centos7', 'ubuntu6.01', 'windows'],
+    'os|1': IsoList,
     'iso|1': ['centos7.iso', 'ubuntu6.01.iso', 'windows.iso'],
-    'storage|1': ['storage01', 'storage02', 'storage03'],
+    'storage|1': StorageList,
     state: '@integer(1, 5)'
   }))
 }
@@ -66,7 +68,7 @@ export default [
   },
 
   {
-    url: '/vm/create',
+    url: '/vm/allControl/createVm',
     type: 'post',
     response: _ => {
       return {
@@ -87,7 +89,7 @@ export default [
     }
   },
   {
-    url: '/vm/delete',
+    url: '/vm/allControl/deleteVm',
     type: 'post',
     response: _ => {
       return {
@@ -98,7 +100,7 @@ export default [
   },
 
   {
-    url: '/vm/runing',
+    url: '/vm/allControl/startVm',
     type: 'post',
     response: _ => {
       return {
@@ -109,12 +111,34 @@ export default [
   },
 
   {
-    url: '/vm/pause',
+    url: '/vm/allControl/stopVm',
     type: 'post',
     response: _ => {
       return {
         code: 20000,
         data: 'success'
+      }
+    }
+  },
+  {
+    url: '/vm/allControl/getIsoMsg',
+    type: 'post',
+    response: _ => {
+      const isoVolList = {}
+      IsoList.map(item => { isoVolList[item] = '/var/iso/' + item })
+      return {
+        code: 20000,
+        data: { 'isoVolList': isoVolList }
+      }
+    }
+  },
+  {
+    url: '/vm/allControl/getStoragePoolsMsg',
+    type: 'post',
+    response: _ => {
+      return {
+        code: 20000,
+        data: { 'spsNameList': StorageList }
       }
     }
   }

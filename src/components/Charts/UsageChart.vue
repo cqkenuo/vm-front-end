@@ -83,10 +83,13 @@ export default {
   mounted () {
     setInterval(() => {
       const dataSize = 20
-      this.areaChartData.push(this.usage / (this.capacity || 100) * 100)
-      if (this.areaChartData.length > dataSize) {
-        this.areaChartData.splice(this.areaChartData.length - dataSize, dataSize)
-      }
+      this.areaChartData.push({
+        name: new Date(),
+        value: [new Date(), this.usage / (this.capacity || 100) * 100]
+      })
+      // if (this.areaChartData.length > dataSize) {
+      //   this.areaChartData.splice(this.areaChartData.length - dataSize, dataSize)
+      // }
     }, 2000)
   },
   methods: {

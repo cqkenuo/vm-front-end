@@ -54,29 +54,40 @@ export const constantRoutes = [
     }]
   },
   {
-    path: '/manager',
+    path: '/vm-manager',
     component: Layout,
-    redirect: '/manager/vm',
-    name: 'Manager',
-    meta: { title: '管理面板', icon: 'dashboard' },
-    children: [{
-      path: 'vm',
-      name: 'VM',
-      component: () => import('@/views/vm/index'),
-      meta: { title: '虚拟机', icon: 'table' }
-    },
-    {
-      path: 'host',
-      name: 'Host',
-      component: () => import('@/views/host/index'),
-      meta: { title: '主机', icon: 'table' }
-    },
-    {
-      path: 'cluster',
-      name: 'Cluster',
-      component: () => import('@/views/cluster/index'),
-      meta: { title: '集群', icon: 'table' }
-    }]
+    children: [
+      {
+        path: 'index',
+        name: 'VM',
+        component: () => import('@/views/vm/index'),
+        meta: { title: '虚拟机管理', icon: 'table' }
+      }
+    ]
+  },
+  {
+    path: '/host-manager',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Host',
+        component: () => import('@/views/host/index'),
+        meta: { title: '主机管理', icon: 'table' }
+      }
+    ]
+  },
+  {
+    path: '/cluster-manager',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Cluster',
+        component: () => import('@/views/cluster/index'),
+        meta: { title: '集群管理', icon: 'table' }
+      }
+    ]
   },
   {
     path: '/log',
@@ -95,7 +106,7 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
+        path: 'https://github.com/kongfu-cat/vm-front-end/',
         meta: { title: '关于', icon: 'link' }
       }
     ]

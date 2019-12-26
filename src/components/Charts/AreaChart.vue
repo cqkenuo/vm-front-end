@@ -58,13 +58,19 @@ export default {
       this.chart = echarts.init(document.getElementById(this.id))
       this.chart.setOption({
         xAxis: {
-          type: 'category',
-          boundaryGap: false,
-          show: false
+          show: false,
+          type: 'time',
+          splitLine: {
+            show: false
+          }
         },
         yAxis: {
+          show: false,
           type: 'value',
-          show: false
+          boundaryGap: [0, '100%'],
+          splitLine: {
+            show: false
+          }
         },
         series: [{
           showSymbol: false,

@@ -65,6 +65,7 @@
       <el-table-column
         label="所属主机"
         align="center"
+        width="100"
       >
         <template slot-scope="{row}">
           <span>{{ row.hid }}</span>
@@ -74,6 +75,7 @@
       <el-table-column
         label="所属集群"
         align="center"
+        width="100"
       >
         <template slot-scope="{row}">
           <span>{{ row.gid }}</span>
@@ -93,6 +95,7 @@
       <el-table-column
         label="操作系统"
         align="center"
+        width="150"
       >
         <template slot-scope="{row}">
           <span>{{ row.os }}</span>
@@ -102,6 +105,7 @@
       <el-table-column
         label="状态"
         align="center"
+        width="150"
       >
         <template slot-scope="{row}">
           <span>{{ stateDict[row.state] }}</span>
@@ -302,7 +306,7 @@
     <el-dialog
       title="详细信息"
       :visible.sync="dialogDetailVisible"
-      width="100%"
+      :fullscreen="true"
     >
       <detail :data="dialogDetailData" />
     </el-dialog>
@@ -311,7 +315,7 @@
 </template>
 
 <script>
-import { getVMList, getVM, createVM, updateVM, deleteVM, operateVM } from '@/api/vm'
+import { getVMList, getVM, createVM, updateVM, deleteVM, operateVM, getIsoList, getStorageList } from '@/api/vm'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import Detail from './detail' // secondary package based on el-pagination
 export default {
@@ -340,6 +344,14 @@ export default {
   },
   created () {
     this.getList()
+  },
+  mounted () {
+    getIsoList().then(res => {
+      this.isoDict = res
+    })
+    getStorageList().then(res => {
+      this.storageDict = res
+    })
   },
   methods: {
     // 搜索

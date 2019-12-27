@@ -38,7 +38,7 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column
+      <!-- <el-table-column
         label="ID"
         prop="id"
         align="center"
@@ -47,7 +47,7 @@
         <template slot-scope="{row}">
           <span>{{ row.vid }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
 
       <el-table-column
         label="名称"
@@ -68,7 +68,7 @@
         width="100"
       >
         <template slot-scope="{row}">
-          <span>{{ row.hid }}</span>
+          <span>{{ hostDict.find(item=>{return (item.key === row.hid)})?hostDict.find(item=>{return (item.key === row.hid)})['display_name'] : row.hid }}</span>
         </template>
       </el-table-column>
 
@@ -78,7 +78,7 @@
         width="100"
       >
         <template slot-scope="{row}">
-          <span>{{ row.gid }}</span>
+          <span>{{ clusterDict.find(item=>{return (item.key === row.gid)})?clusterDict.find(item=>{return (item.key === row.gid)})['display_name'] : row.hid }}</span>
         </template>
       </el-table-column>
 
@@ -108,7 +108,7 @@
         width="150"
       >
         <template slot-scope="{row}">
-          <span>{{ stateDict[row.state] }}</span>
+          <span>{{ (parseInt(row.status))?stateDict[parseInt(row.status)]:row.status }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -125,7 +125,7 @@
             编辑
           </el-button>
           <el-button
-            v-if="row.status!='runing'"
+            v-if="row.status==1 || row.status=='nostate'"
             size="mini"
             type="success"
             @click="handleOperate(row, 1)"
@@ -133,7 +133,7 @@
             运行
           </el-button>
           <el-button
-            v-if="row.status!='pause'"
+            v-if="row.status!=1 && row.status!='nostate'"
             size="mini"
             @click="handleOperate(row, 2)"
           >
@@ -151,13 +151,13 @@
       </el-table-column>
     </el-table>
 
-    <pagination
+    <!-- <pagination
       v-show="total>0"
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.limit"
       @pagination="getList"
-    />
+    /> -->
 
     <!-- 表单修改 模态框 -->
     <el-dialog
@@ -308,7 +308,7 @@
       :visible.sync="dialogDetailVisible"
       :fullscreen="true"
     >
-      <detail :data="dialogDetailData" />
+      <detail :detail-data="dialogDetailData" />
     </el-dialog>
   </div>
 
@@ -316,6 +316,9 @@
 
 <script>
 import { getVMList, getVM, createVM, updateVM, deleteVM, operateVM, getIsoList, getStorageList } from '@/api/vm'
+import { getHostList } from '@/api/host'
+import { getClusterList } from '@/api/cluster'
+import { getConn } from '@/api/vm'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import Detail from './detail' // secondary package based on el-pagination
 export default {
@@ -346,12 +349,31 @@ export default {
     this.getList()
   },
   mounted () {
-    getIsoList().then(res => {
-      this.isoDict = res
+    getConn().then(res => {
+      if (res.msg === 'succeed') {
+        getIsoList().then(res => {
+          this.isoDict = res
+        })
+        getStorageList().then(res => {
+          this.storageDict = res
+        })
+      }
     })
-    getStorageList().then(res => {
-      this.storageDict = res
+    getHostList().then(res => {
+      const data = res.data.items
+      data.map(item => {
+        this.hostDict.push({ key: item.hid, display_name: item.name })
+      })
     })
+    getClusterList().then(res => {
+      const data = res.data.items
+      data.map(item => {
+        this.clusterDict.push({ key: item.gid, display_name: item.name })
+      })
+    })
+    for (let i = 1; i < 5; i++) {
+      this.cpuDict.push({ key: i, display_name: i })
+    }
   },
   methods: {
     // 搜索
@@ -374,10 +396,18 @@ export default {
     handleOperate (row, type) {
       operateVM(row, type).then(
         response => {
-          this.$message({
-            message: '操作Success',
-            type: 'success'
-          })
+          if (response.msg === 'succeed') {
+            this.$message({
+              message: '操作成功',
+              type: 'success'
+            })
+            this.getList()
+          } else {
+            this.$message({
+              message: '操作失败',
+              type: 'error'
+            })
+          }
           row.state = response
         }
       )
@@ -395,15 +425,26 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          createVM(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          createVM(this.temp).then((res) => {
+            if (res.msg === 'succeed') {
+              this.$notify({
+                title: 'Success',
+                message: '创建成功',
+                type: 'success',
+                duration: 2000
+              })
+              // this.list.unshift(this.temp)
+              // update the table data
+              this.getList()
+            } else if (res.msg === 'fail') {
+              this.$notify({
+                title: 'Error',
+                message: '创建失败',
+                type: 'error',
+                duration: 2000
+              })
+            }
             this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: '创建成功',
-              type: 'success',
-              duration: 2000
-            })
           })
         }
       })
@@ -467,6 +508,20 @@ export default {
     // 展示
     handleShow (row) {
       this.dialogDetailData = Object.assign({}, row)
+      this.hostDict.find(item => {
+        if (item.key === row.hid) {
+          this.dialogDetailData.host_name = item.display_name
+          return true
+        }
+        return false
+      })
+      this.clusterDict.find(item => {
+        if (item.key === row.gid) {
+          this.dialogDetailData.cluster_name = item.display_name
+          return true
+        }
+        return false
+      })
       this.dialogDetailVisible = true
     }
   }

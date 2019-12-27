@@ -30,14 +30,14 @@
           </div>
           <div>
             <el-row :gutter="10">
-              <el-col :span="12">名称</el-col>
-              <el-col :span="12">所属集群</el-col>
-              <el-col :span="12">所属主机</el-col>
-              <el-col :span="12">操作系统</el-col>
-              <el-col :span="12">内存大小</el-col>
-              <el-col :span="12">磁盘大小</el-col>
-              <el-col :span="12">状态</el-col>
-              <el-col :span="12">CPU个数</el-col>
+              <el-col :span="12">名称: {{ vm.name }}</el-col>
+              <el-col :span="12">所属集群: {{ vm.cluster_name || vm.gid }}</el-col>
+              <el-col :span="12">所属主机: {{ vm.host_name || vm.hid }}</el-col>
+              <el-col :span="12">操作系统: {{ vm.os }}</el-col>
+              <el-col :span="12">内存大小: {{ vm.mem_size }}</el-col>
+              <el-col :span="12">磁盘大小: {{ vm.disk_size }}</el-col>
+              <el-col :span="12">状态: {{ vm.state }}</el-col>
+              <el-col :span="12">CPU个数: {{ vm.cpu_num }}</el-col>
             </el-row>
           </div>
         </el-card>
@@ -199,11 +199,21 @@
 import UsageChart from '@/components/Charts/UsageChart'
 export default {
   components: { UsageChart },
-  props: ['data'],
+  props: {
+    detailData: {
+      type: Object,
+      default: () => { return {} }
+    }
+  },
   data () {
     return {
       host: {},
       cluster: {}
+    }
+  },
+  computed: {
+    vm () {
+      return this.detailData
     }
   }
 }

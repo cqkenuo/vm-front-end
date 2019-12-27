@@ -121,11 +121,20 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then((data) => {
             console.log('handleLogin.data', data, this.redirect)
-            this.$message({
-              type: 'info',
-              message: data.msg
-            })
-            this.$router.push({ path: this.redirect || '/' })
+            if (data.msg === 'succeed') {
+              this.$notify({
+                title: 'Success',
+                message: '登录成功',
+                type: 'success',
+                duration: 2000
+              })
+              this.$router.push({ path: this.redirect || '/' })
+            } else {
+              this.$message({
+                type: 'info',
+                message: data.msg
+              })
+            }
             this.loading = false
           }).catch(() => {
             this.loading = false

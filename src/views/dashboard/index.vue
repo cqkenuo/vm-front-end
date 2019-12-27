@@ -26,7 +26,7 @@
             class="header-card"
           >
             <div>
-              <i class="el-icon-info" /> 数据中心
+              数据中心
             </div>
             <div>
               {{ dataCenterNum }}
@@ -117,10 +117,7 @@
               class="clearfix"
             >
               <span>性能监控</span>
-              <el-button
-                style="float: right; padding: 3px 0"
-                type="text"
-              >操作按钮</el-button>
+              <span style="float: right; padding: 3px 0">{{ this.curVmName?'当前虚拟机: '+ this.curVmName: '' }}</span>
             </div>
             <div>
               <el-row :gutter="20">
@@ -138,7 +135,7 @@
                     title="Memory"
                     :usage="mem_used"
                     :capacity="mem_size"
-                    unit="GB"
+                    :unit="mem_unit"
                     height="100%"
                     width="100%"
                   />
@@ -157,7 +154,7 @@
                     title="Disk"
                     :usage="disk_used"
                     :capacity="disk_size"
-                    unit="GB"
+                    :unit="disk_unit"
                     height="100%"
                     width="100%"
                   />
@@ -179,7 +176,8 @@
 <script>
 import { mapGetters } from 'vuex'
 import UsageChart from '@/components/Charts/UsageChart'
-import { getClusterTree, loadTreeNode } from '@/api/cluster'
+import { getClusterTree, loadTreeNode, getVmInfo } from '@/api/cluster'
+import { getConn } from '@/api/vm'
 
 export default {
   name: 'Dashboard',
@@ -191,6 +189,8 @@ export default {
   },
   data () {
     return {
+      curVmName: '',
+
       dataCenterNum: 0,
       clusterNum: 0,
       hostNum: 0,
@@ -204,7 +204,8 @@ export default {
       network_used: 0,
       disk_used: 0,
       disk_size: 0,
-
+      mem_unit: 'GB',
+      disk_unit: 'GB',
       filterText: '',
       treeData: [],
       defaultProps: {
@@ -219,8 +220,11 @@ export default {
       this.$refs.nodeTree.filter(val)
     }
   },
+  created () {
+    getConn()
+  },
   mounted () {
-    setInterval(() => { this.randomData() }, 2000)
+    // setInterval(() => { this.randomData() }, 2000)
   },
   methods: {
     // 模拟用的假数据
@@ -255,7 +259,20 @@ export default {
     },
     handleNodeClick (node) {
       if (node.data.vmId !== null) {
-        // ToDo: 节点点击后刷新左侧数据
+        // TODO: 节点点击后刷新左侧数据
+        // console.log('handleNodeClick.req', node.data)
+        getVmInfo(node.data).then(data => {
+          // console.log('handleNodeClick.res', data)
+          this.curVmName = data.vmName
+          this.cpu_used = 0
+          this.mem_used = 0
+          this.mem_size = data.vmMsginDB.memSize / 1024
+          this.mem_unit = 'MB'
+          this.network_used = 0
+          this.disk_used = 0
+          this.disk_unit = 'KB'
+          this.disk_size = data.vmMsginDB.diskSize
+        })
       }
     }
   }

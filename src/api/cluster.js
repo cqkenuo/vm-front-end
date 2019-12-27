@@ -1,15 +1,22 @@
 import request from '@/utils/request'
 
-export function getClusterList (query) {
-  return request({
-    url: '/cluster/list',
-    method: 'get',
-    params: query
-  })
-}
-
 function nodeDataFilter (node) {
-  return { gid: node.clusterId, name: node.nodeName, desc: node.nodeDesc }
+  return { gid: node.clusterId, name: node.nodeName, desc: node.nodeDesc, status: node.status }
+}
+export function getClusterList () {
+  return new Promise((resolve, reject) => {
+    request({
+      url: '/vm/allControl?listClusterNode',
+      method: 'post'
+    }).then(res => {
+      const resList = res.clusterNodeList
+      const dataList = []
+      for (const data of resList) {
+        dataList.push(nodeDataFilter(data))
+      }
+      resolve({ data: { items: dataList, total: dataList.length } })
+    })
+  })
 }
 
 // export function getClusterList (query) {
@@ -41,10 +48,10 @@ export function createCluster (data) {
   postData.nodeDesc = data.desc
   postData.status = 1
   return request({
-    // url: '/cluster/create',
-    url: '/vm/allControl/addCluster',
+    url: '/vm/allControl?addCluster',
     method: 'post',
-    postData
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    data: postData
   })
 }
 
@@ -59,20 +66,23 @@ export function updateCluster (data) {
 export function deleteCluster (data) {
   postData.id = data.gid
   return request({
-    // url: '/cluster/delete',
-    url: '/vm/allControl/deleteCluster',
+    url: '/vm/allControl?deleteCluster',
     method: 'post',
-    postData
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    data: postData
   })
 }
 function treeNodeFilter (data) {
+  data = data || []
   return data.map(item => {
     data = { id: item.id, label: item.nodeName, parentId: item.parentId, data: item }
     if (item.clusterId) {
       data.isLeaf = false
-    } else if (item.hostId) {
+    }
+    if (item.hostId) {
       data.isLeaf = false
-    } else if (item.vmId) {
+    }
+    if (item.vmId) {
       data.isLeaf = true
     }
     return data
@@ -134,19 +144,28 @@ export function getClusterTree (data) {
 }
 
 export function loadTreeNode (data) {
-  const params = new URLSearchParams()
-  for (const key in data) {
-    params.append(key, data[key])
-  }
   return new Promise((resolve, reject) => {
     request({
       url: '/vm/allControl?getTree',
       method: 'post',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      data: params
+      data: data
     }).then(res => {
       const treeData = treeNodeFilter(res.nodeList)
       resolve(treeData)
+    })
+  })
+}
+
+export function getVmInfo (data) {
+  return new Promise((resolve, reject) => {
+    request({
+      url: '/vm/allControl?getTree',
+      method: 'post',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      data: data
+    }).then(res => {
+      resolve(res.vmMsg || {})
     })
   })
 }

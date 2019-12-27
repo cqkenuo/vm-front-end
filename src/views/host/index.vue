@@ -38,7 +38,7 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column
+      <!-- <el-table-column
         label="ID"
         prop="id"
         align="center"
@@ -47,7 +47,7 @@
         <template slot-scope="{row}">
           <span>{{ row.hid }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
 
       <el-table-column
         label="名称"
@@ -142,13 +142,13 @@
       </el-table-column>
     </el-table>
 
-    <pagination
+    <!-- <pagination
       v-show="total>0"
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.limit"
       @pagination="getList"
-    />
+    /> -->
 
     <!-- 表单修改 模态框 -->
     <el-dialog
@@ -402,8 +402,11 @@ export default {
     },
     // 展示
     handleShow (row) {
-      this.dialogDetailData = Object.assign({}, row)
-      this.dialogDetailVisible = true
+      getHost(row.hid).then(res => {
+        console.log('host.handleShow', res)
+        this.dialogDetailData = Object.assign({}, row)
+        this.dialogDetailVisible = true
+      })
     }
   }
 }

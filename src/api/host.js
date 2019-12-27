@@ -18,7 +18,7 @@ import request from '@/utils/request'
 export function getHostList (id) {
   return new Promise((resolve, reject) => {
     request({
-      url: '/vm/allControl/getHostMsgList',
+      url: '/vm/allControl?getHostMsgList',
       method: 'post'
     }).then(res => {
       const resList = res.msg
@@ -31,11 +31,13 @@ export function getHostList (id) {
   })
 }
 
-export function getHost (id) {
+export function getHost (hostId) {
   return new Promise((resolve, reject) => {
     request({
-      url: '/vm/allControl/getHostMsg',
-      method: 'post'
+      url: '/vm/allControl?getHostMsgByHostId',
+      method: 'post',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      data: { hostId: hostId }
     }).then(res => {
       resolve(hostMsgFilter(res.msg))
     })
@@ -50,7 +52,7 @@ export function getHost (id) {
 //   })
 // }
 function nodeDataFilter (node) {
-  return { hid: node.hostId, name: node.nodeName, desc: node.nodeDesc }
+  return { hid: node.hostId, name: node.nodeName, desc: node.nodeDesc, status: node.status }
 }
 function hostParamsFilter (params) {
   return {
@@ -89,9 +91,10 @@ function hostMsgFilter (params) {
 export function createHost (data) {
   const postData = hostParamsFilter(data)
   return request({
-    url: '/vm/allControl/addHost',
+    url: '/vm/allControl?addHost',
     method: 'post',
-    postData
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    data: postData
   })
 }
 export function updateHost (data) {
@@ -112,9 +115,10 @@ export function updateHost (data) {
 export function deleteHost (data) {
   const postData = hostParamsFilter(data)
   return request({
-    url: '/vm/allControl/deleteHost',
+    url: '/vm/allControl?deleteHost',
     method: 'post',
-    postData
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    data: postData
   })
 }
 export function operateHost (data, type) {

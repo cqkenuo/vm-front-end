@@ -14,7 +14,18 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-
+    // console.log('service.interceptors.request', config, config.method, config.headers.post['Content-Type'], config.data)
+    // 对 application/x-www-form-urlencoded 类型的数据进行重写
+    if (config.method === 'post' && config.headers.post['Content-Type'] === 'application/x-www-form-urlencoded') {
+      const data = config.data
+      const params = new URLSearchParams()
+      for (const key in data) {
+        if (data[key] !== null && data[key] !== undefined) {
+          params.append(key, data[key])
+        }
+      }
+      config.data = params
+    }
     // if (store.getters.token) {
     //   // let each request carry token
     //   // ['X-Token'] is a custom headers key
@@ -46,6 +57,11 @@ service.interceptors.response.use(
     const res = response.data
     // if the custom code is not 20000, it is judged as an error.
     console.log('service.interceptors.response', response)
+    if (res['no-session'] && res['no-session'] === 'unLogin') {
+      store.dispatch('user/resetToken').then(() => {
+        location.reload()
+      })
+    }
     return res
     // if (res.code !== 20000) {
     //   Message({
